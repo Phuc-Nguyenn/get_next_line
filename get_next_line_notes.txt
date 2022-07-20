@@ -1,0 +1,61 @@
+fd = open("file.txt", O_RDONLY)
+fd is now a number > 3, that corresponds to file.txt
+
+
+the read function:
+size_t read(int fd, void *buf, size_t count);
+in our get_next_line, we think of it as
+size_t read(int fd, char *buff, size_t count);
+reads from fd (a file) and puts 'count' bytes of it into string char *buff.
+therefore each time read is called, it will only read 'count' number of bytes. 
+The read function remembers where it has read up to so when called again it continues from there. 
+
+Important FACTS
+- must return line with '\n' unless it is at the end
+- If the file offset is at or past the end of file, no bytes are read, and read() returns zero.
+
+Function 1: read the file
+The read function happens in a while loop. 
+Conditions are if not end of file (ofcourse) and if '\n' has not been reached.
+In while loop, char *buff, is continuously ft_strjoin'ed onto the static variable: save.
+When the while loop stops, we have very long string in 'save', where we know that near 
+the end is either a '\0' or '\n'.
+then we return(save)
+Also must buff(read_bytes)='\0' to end buff, otherwise str_join won't know when to stop.
+str_join must free, save as it returns another str, so to prevent leaks you must free(s1)
+Also in str_join, if there is no save must have '\0' other wise it will segfault. (as later on in str_join you try to acces s1[0] which you don't have access to.
+
+
+Function 2: getting the line from save
+This function counts characters up to '\n', mallocs a string of that size and copies everything until '\n'.
+returns char *line.
+Malloc is +2 to accommodate the '\n' that might need to end the line and the '\0'.
+If no '\n' that means that it is a '\0' so just end the line there.
+
+Function 3: saving the extra characters.
+save string might look like this: s egrhoei hgfoiwaf anlknfowiefnwioef'\n'gnlextras
+line string might look like this: s egrhoei hgfoiwaf anlknfowiefnwioef
+now we make new_save string which looks like this: gnlextras
+
+This is because read remembers where it was up to ie. 's'. but it will forget the characters '\n' - 's'.
+therefore we need to 'save' these characters.
+therefore our new_string is :gnlextras
+
+1) moves i to '\n' character
+2) mallocs string new_save size of (length of save - length of i) + 1 for '\0'
+3) copies characters after '\n' using i to new_save
+4) free (save) (don't need it anymore because new_save becomes the save) --> next function will explain.
+
+Function 4: bringing everything together	get_next_line function
+outputs line, inputs fd.
+declare static variable save
+declare return line
+check fd is valid
+save = call reading function
+line = get line from save function
+reset save to the next line ( characters after '\n')
+return line
+BAM DONE
+
+
+
